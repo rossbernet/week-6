@@ -123,12 +123,18 @@ of the application to report this information.
 
 ===================== */
 
-var dataset = "https://raw.githubusercontent.com/CPLN692-MUSA611/datasets/master/geojson/philadelphia-garbage-collection-boundaries.geojson"
+var dataset = "https://raw.githubusercontent.com/CPLN692-MUSA611/datasets/master/geojson/philadelphia-garbage-collection-boundaries.geojson";
 var featureGroup;
 
 var myStyle = function(feature) {
-  return {};
-};
+        switch (feature.properties.COLLDAY) {
+            case 'MON': return {color: "green"};
+            case 'TUE': return {color: "ared"};
+            case 'WED': return {color: "yellow"};
+            case 'THU': return {color: "blue"};
+            case 'FRI': return {color: "purple"};
+        }
+    };
 
 var showResults = function() {
   /* =====================
@@ -151,14 +157,32 @@ var eachFeatureFunction = function(layer) {
     Check out layer.feature to see some useful data about the layer that
     you can use in your application.
     ===================== */
+    var day = layer.feature.properties.COLLDAY;
     console.log(layer.feature);
+    $(".day-of-week").text(fullDay(day));
     showResults();
   });
 };
 
-var myFilter = function(feature) {
-  return true;
+var fullDay = function(shortDay) {
+  switch (shortDay) {
+      case 'MON': return 'Monday';
+      case 'TUE': return 'Tueday';
+      case 'WED': return 'Wednesday';
+      case 'THU': return 'Thursday';
+      case 'FRI': return 'Friday';
+  }
 };
+
+var myFilter = function(feature) {
+  if (feature.properties.COLLDAY === ' ') {
+    return false;
+  }
+  else {
+    return true;
+  }
+};
+
 
 $(document).ready(function() {
   $.ajax(dataset).done(function(data) {
@@ -166,6 +190,7 @@ $(document).ready(function() {
     featureGroup = L.geoJson(parsedData, {
       style: myStyle,
       filter: myFilter
+
     }).addTo(map);
 
     // quite similar to _.each
